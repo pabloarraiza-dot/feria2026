@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Ciclo de la Semilla Mágica - Simulador Interactivo</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #eef9f6 0%, #d6edd9 100%);
+            min-height: 100vh;
+        }
+        .fancy-title {
+            font-family: 'Fredoka One', cursive;
+        }
+        /* Custom styled range input for retro-botanical feel */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #cbd5e1;
+            border-radius: 9999px;
+            height: 8px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #059669;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto bg-white rounded-3xl shadow-2xl border-4 border-emerald-100 overflow-hidden">
+        
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white text-center relative">
+            <h1 class="fancy-title text-3xl md:text-5xl tracking-wide drop-shadow-md">
+                🌱 El Ciclo de la Semilla Mágica
+            </h1>
+            <p class="text-emerald-100 text-sm md:text-base mt-2 font-medium">
+                ¡Experimenta, analiza datos matemáticos y descubre el comportamiento ecológico vegetal!
+            </p>
+            <div class="absolute top-4 right-4 flex space-x-2">
+                <button id="btn-tab-libre" class="px-4 py-1.5 rounded-full bg-white text-emerald-700 font-bold text-xs shadow-md transition-all scale-105" onclick="switchTab('libre')">
+                    🔬 Simulador Libre
+                </button>
+                <button id="btn-tab-desafios" class="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all" onclick="switchTab('desafios')">
+                    🏆 Desafíos
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+            
+            <!-- PANEL IZQUIERDO: CONTROLES / DESAFÍOS (Lg: 5/12) -->
+            <div class="lg:col-span-5 p-6 bg-slate-50 border-r border-slate-100 flex flex-col justify-between">
+                
+                <!-- TAB 1: SIMULADOR LIBRE -->
+                <div id="panel-libre" class="space-y-6">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                        <span>🎛️</span> Panel de Control Ambiental
+                    </h2>
+
+                    <!-- Control: Semilla -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-md">
+                        <label class="block text-slate-700 font-bold mb-2 flex justify-between items-center">
+                            <span>🧬 Tipo de Semilla</span>
+                            <span id="label-semilla" class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">Rábano (Rápida)</span>
+                        </label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="updateSemilla('rapida', 'Rábano (Rápida)')" id="semilla-rapida" class="py-2 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-all">
+                                🍒 Rábano<br><span class="text-[10px] font-normal">Ciclo de 25 días</span>
+                            </button>
+                            <button onclick="updateSemilla('normal', 'Tomate (Normal)')" id="semilla-normal" class="py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                🍅 Tomate<br><span class="text-[10px] font-normal">Ciclo de 45 días</span>
+                            </button>
+                            <button onclick="updateSemilla('lenta', 'Arbusto (Lenta)')" id="semilla-lenta" class="py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                🌳 Arbusto<br><span class="text-[10px] font-normal">Ciclo de 60 días</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Control: Luz -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-slate-700 flex items-center gap-1.5">☀️ Luz (Sol)</span>
+                            <span id="val-luz" class="text-sm font-bold text-amber-500">Media</span>
+                        </div>
+                        <input type="range" id="input-luz" min="1" max="3" value="2" class="w-full mt-2" oninput="triggerSimulation()">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-semibold px-1 mt-1">
+                            <span>POCA</span>
+                            <span>MEDIA</span>
+                            <span>MUCHA</span>
+                        </div>
+                    </div>
+
+                    <!-- Control: Agua -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-slate-700 flex items-center gap-1.5">💧 Agua (Riego)</span>
+                            <span id="val-agua" class="text-sm font-bold text-blue-500">Húmedo</span>
+                        </div>
+                        <input type="range" id="input-agua" min="1" max="3" value="2" class="w-full mt-2" oninput="triggerSimulation()">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-semibold px-1 mt-1">
+                            <span>SECO</span>
+                            <span>HÚMEDO</span>
+                            <span>INUNDADO</span>
+                        </div>
+                    </div>
+
+                    <!-- Control: Suelo -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <label class="block text-slate-700 font-bold mb-2 flex justify-between items-center">
+                            <span>🪨 Textura del Suelo</span>
+                            <span id="label-suelo" class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-bold">Limo (Fértil)</span>
+                        </label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="updateSuelo('arena', 'Arena (Drenaje rápido)')" id="suelo-arena" class="py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                🏜️ Arena
+                            </button>
+                            <button onclick="updateSuelo('limo', 'Limo (Equilibrado)')" id="suelo-limo" class="py-2 text-xs font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-800 transition-all">
+                                🪵 Limo
+                            </button>
+                            <button onclick="updateSuelo('arcilla', 'Arcilla (Retiene agua)')" id="suelo-arcilla" class="py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                🧱 Arcilla
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Control: Nutrientes -->
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-slate-700 flex items-center gap-1.5">🍃 Nutrientes (Abono)</span>
+                            <span id="val-nutrientes" class="text-sm font-bold text-green-500">Medio</span>
+                        </div>
+                        <input type="range" id="input-nutrientes" min="1" max="3" value="2" class="w-full mt-2" oninput="triggerSimulation()">
+                        <div class="flex justify-between text-[10px] text-slate-400 font-semibold px-1 mt-1">
+                            <span>BAJO</span>
+                            <span>MEDIO</span>
+                            <span>ALTO</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: MODO DESAFÍOS (Inicialmente oculto) -->
+                <div id="panel-desafios" class="space-y-4 hidden">
+                    <h2 class="text-xl font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                        <span>🏆</span> Desafíos Botánicos
+                    </h2>
+                    <p class="text-xs text-slate-500">Logra la configuración adecuada de controles y avanza el tiempo para superar los desafíos.</p>
+
+                    <!-- Lista de desafíos en acordeón / tarjetas -->
+                    <div class="space-y-3">
+                        <!-- Desafío 1 -->
+                        <div id="card-desafio-1" class="border-2 border-emerald-500 bg-emerald-50/50 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md" onclick="selectDesafio(1)">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-emerald-800 tracking-wider">MISION 1</span>
+                                <span id="status-desafio-1" class="text-xs font-bold text-amber-600">Pendiente</span>
+                            </div>
+                            <h3 class="font-bold text-slate-800">🏜️ El Desierto Productivo</h3>
+                            <p class="text-xs text-slate-600 mt-1">Haz crecer un <strong>Rábano</strong> en suelo <strong>Arenoso</strong>. Necesitarás ajustar el riego y los nutrientes con cuidado para compensar el suelo.</p>
+                        </div>
+
+                        <!-- Desafío 2 -->
+                        <div id="card-desafio-2" class="border border-slate-200 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md" onclick="selectDesafio(2)">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-slate-400 tracking-wider">MISION 2</span>
+                                <span id="status-desafio-2" class="text-xs font-bold text-slate-400">Bloqueado</span>
+                            </div>
+                            <h3 class="font-bold text-slate-700">🍅 El Tomate Gourmet</h3>
+                            <p class="text-xs text-slate-500 mt-1">Logra que tu planta de <strong>Tomate</strong> alcance su máximo desarrollo con <strong>Frutos Perfectos</strong> en suelo de <strong>Limo o Arcilla</strong>.</p>
+                        </div>
+
+                        <!-- Desafío 3 -->
+                        <div id="card-desafio-3" class="border border-slate-200 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md" onclick="selectDesafio(3)">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-slate-400 tracking-wider">MISION 3</span>
+                                <span id="status-desafio-3" class="text-xs font-bold text-slate-400">Bloqueado</span>
+                            </div>
+                            <h3 class="font-bold text-slate-700">🌳 Supervivencia Extrema</h3>
+                            <p class="text-xs text-slate-500 mt-1">Ayuda al <strong>Arbusto</strong> a sobrevivir al día 50 en un entorno de <strong>Poca Luz</strong> y suelo de <strong>Arcilla</strong> sin ahogarlo.</p>
+                        </div>
+                    </div>
+
+                    <!-- Indicaciones específicas del Desafío activo -->
+                    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mt-4">
+                        <span class="text-xs font-extrabold text-amber-800 block">🎯 OBJETIVO ACTUAL:</span>
+                        <p id="desc-desafio-activo" class="text-xs text-amber-950 font-medium mt-1">
+                            Configura: Semilla de Rábano, Suelo Arenoso, Riego Humedo, Luz Alta, Nutrientes Altos y llega al día 25.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CONTROLES COMUNES DE TIEMPO (Abajo del panel izquierdo) -->
+                <div class="mt-6 pt-4 border-t border-slate-200 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <span class="font-extrabold text-slate-800 flex items-center gap-1">
+                            📅 Línea de Tiempo
+                        </span>
+                        <span id="label-dias" class="text-lg font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
+                            Día 1
+                        </span>
+                    </div>
+
+                    <!-- Slider de Tiempo -->
+                    <div class="relative">
+                        <input type="range" id="input-tiempo" min="1" max="60" value="1" class="w-full" oninput="updateTiempo(this.value)">
+                        <div class="flex justify-between text-[11px] text-slate-400 font-extrabold px-1 mt-1">
+                            <span>DÍA 1 (Siembra)</span>
+                            <span>DÍA 30</span>
+                            <span>DÍA 60 (Cosecha)</span>
+                        </div>
+                    </div>
+
+                    <!-- Botón Animación Reproducir/Pausar -->
+                    <div class="flex gap-2">
+                        <button id="btn-play" onclick="togglePlay()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                            <span id="icon-play">▶️</span> <span id="text-play">Simular Ciclo</span>
+                        </button>
+                        <button onclick="resetSimulation()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 rounded-xl transition-all" title="Reiniciar">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PANEL DERECHO: PANTALLA DE CULTIVO (Lg: 7/12) -->
+            <div class="lg:col-span-7 p-6 flex flex-col justify-between min-h-[500px] md:min-h-[600px] relative overflow-hidden bg-gradient-to-b from-sky-200 via-sky-100 to-amber-50">
+                
+                <!-- Clima / Efectos Visuales superiores -->
+                <div class="absolute inset-0 pointer-events-none z-0">
+                    <!-- Sol interactivo -->
+                    <svg id="sky-sun" class="absolute top-6 left-6 transition-all duration-500" width="80" height="80" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="20" fill="#f59e0b" class="animate-pulse" />
+                        <g stroke="#f59e0b" stroke-width="4" stroke-linecap="round">
+                            <line x1="50" y1="15" x2="50" y2="25" />
+                            <line x1="50" y1="75" x2="50" y2="85" />
+                            <line x1="15" y1="50" x2="25" y2="50" />
+                            <line x1="75" y1="50" x2="85" y2="50" />
+                            <line x1="25" y1="25" x2="32" y2="32" />
+                            <line x1="68" y1="68" x2="75" y2="75" />
+                            <line x1="75" y1="25" x2="68" y2="32" />
+                            <line x1="32" y1="68" x2="25" y2="75" />
+                        </g>
+                    </svg>
+
+                    <!-- Nubes / Clima interactivo -->
+                    <div id="sky-weather" class="absolute top-8 right-8 flex space-x-2 transition-opacity duration-500">
+                        <!-- Se poblará dinámicamente con nubes o gotas de lluvia de acuerdo al riego -->
+                    </div>
+                </div>
+
+                <!-- Banner superior del estado ecológico actual -->
+                <div class="z-10 bg-white/80 backdrop-blur-md rounded-2xl p-4 shadow-sm border border-white/50 mb-4">
+                    <div class="flex items-center gap-3">
+                        <div id="status-emoji" class="text-3xl">🌱</div>
+                        <div>
+                            <h4 id="status-title" class="font-bold text-slate-800 text-sm md:text-base">¡Recién sembrado!</h4>
+                            <p id="status-desc" class="text-xs text-slate-600">Asegura un buen balance de luz, agua y nutrientes para iniciar el proceso biológico.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CANVAS PRINCIPAL DE LA PLANTA (SVG interactivo) -->
+                <div class="flex-1 flex items-end justify-center z-10 relative">
+                    <svg id="canvas-planta" class="w-full max-w-[450px] h-[350px] md:h-[400px]" viewBox="0 0 400 400">
+                        <!-- Definiciones de Gradientes -->
+                        <defs>
+                            <linearGradient id="grad-suelo-arena" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#dfc18c" />
+                                <stop offset="100%" stop-color="#be9d62" />
+                            </linearGradient>
+                            <linearGradient id="grad-suelo-limo" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#8a5a36" />
+                                <stop offset="100%" stop-color="#613b1e" />
+                            </linearGradient>
+                            <linearGradient id="grad-suelo-arcilla" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#9f523c" />
+                                <stop offset="100%" stop-color="#703222" />
+                            </linearGradient>
+                            <!-- Filtro para marchitar u opacar -->
+                            <filter id="deshidratado">
+                                <feColorMatrix type="matrix" values="0.77 0 0 0 0.1  0 0.61 0 0 0.1  0 0 0.4 0 0  0 0 0 1 0" />
+                            </filter>
+                        </defs>
+
+                        <!-- Maceta y Suelo en corte transversal -->
+                        <!-- Maceta -->
+                        <path d="M 80 270 L 100 390 L 300 390 L 320 270 Z" fill="#e2e8f0" stroke="#cbd5e1" stroke-width="4" />
+                        <!-- Suelo (Cambia dinámicamente de gradiente según la selección) -->
+                        <path id="svg-suelo" d="M 82 274 L 101 386 L 299 386 L 318 274 Z" fill="url(#grad-suelo-limo)" />
+                        
+                        <!-- Partículas de Nutrientes en el Suelo -->
+                        <g id="svg-nutrientes" opacity="0.6">
+                            <!-- Se renderizan dinámicamente esferitas brillantes si hay abono -->
+                        </g>
+
+                        <!-- Indicador de Humedad de suelo visible en la tierra -->
+                        <rect id="svg-humedad-agua" x="100" y="375" width="200" height="10" rx="5" fill="#3b82f6" opacity="0.5" class="transition-all duration-500" />
+
+                        <!-- RAÍCES SUBTERRÁNEAS (Crecen hacia abajo en base al crecimiento) -->
+                        <g id="svg-raices" stroke-linecap="round">
+                            <!-- Raíz principal animada dinámicamente por JS -->
+                        </g>
+
+                        <!-- TALLO, HOJAS, FLORES Y FRUTOS (Crecimiento superior) -->
+                        <g id="svg-brote" stroke-linecap="round">
+                            <!-- Todo el follaje vegetal dinámico de acuerdo a las fases del juego -->
+                        </g>
+
+                        <!-- Semilla original (Se desintegra al crecer) -->
+                        <g id="svg-semilla" class="transition-opacity duration-500">
+                            <!-- Cascarón de semilla sembrada -->
+                            <path d="M 190 270 C 190 260, 210 260, 210 270 C 210 280, 190 280, 190 270" fill="#a16207" stroke="#713f12" stroke-width="1.5" />
+                        </g>
+                    </svg>
+                </div>
+
+                <!-- Leyenda de datos ecológicos actuales / Salud de la Planta -->
+                <div class="z-10 mt-4 bg-slate-900/90 text-slate-100 p-4 rounded-2xl flex flex-wrap gap-4 items-center justify-between text-xs font-semibold backdrop-blur-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📈</span>
+                        <div>
+                            <span class="text-slate-400 block uppercase tracking-wider text-[9px]">Salud Vegetal</span>
+                            <span id="vitalidad-porcentaje" class="text-emerald-400 font-extrabold text-sm">100% (Óptimo)</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">🌿</span>
+                        <div>
+                            <span class="text-slate-400 block uppercase tracking-wider text-[9px]">Fase de Desarrollo</span>
+                            <span id="fase-actual" class="text-teal-300 font-extrabold text-sm">Semilla</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-lg">📊</span>
+                        <div>
+                            <span class="text-slate-400 block uppercase tracking-wider text-[9px]">Resultado</span>
+                            <span id="resultado-descripcion" class="text-yellow-400 font-extrabold text-sm">Esperando brotes</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SECCIÓN DE TABLA DE VALORES CIENTÍFICOS (NUEVO) -->
+        <section class="bg-slate-900 text-slate-100 p-6 border-t-4 border-slate-800">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                <div>
+                    <h3 class="fancy-title text-emerald-400 text-2xl flex items-center gap-2">
+                        📊 Laboratorio de Datos: Mediciones de Crecimiento
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Valores predictivos y dinámicos para el ciclo biológico completo (60 días) bajo tu configuración actual de variables.
+                    </p>
+                </div>
+                <button onclick="copiarDatosCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold py-2 px-4 rounded-xl transition-all shadow-md flex items-center gap-1.5 self-stretch md:self-auto justify-center">
+                    📋 Copiar CSV (Excel)
+                </button>
+            </div>
+
+            <!-- Tabla de datos Responsiva -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-700">
+                <table class="w-full text-left text-xs md:text-sm">
+                    <thead class="bg-slate-800 text-slate-300 uppercase tracking-wider text-[10px] border-b border-slate-700">
+                        <tr>
+                            <th class="py-3 px-4">Día</th>
+                            <th class="py-3 px-4">Luz (Lux)</th>
+                            <th class="py-3 px-4">Humedad Suelo (%)</th>
+                            <th class="py-3 px-4">Nutrientes Abono (%)</th>
+                            <th class="py-3 px-4">Salud Planta (%)</th>
+                            <th class="py-3 px-4 text-emerald-400">Altura Planta (cm)</th>
+                            <th class="py-3 px-4 text-right">Fase Biológica</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-datos-cuerpo" class="divide-y divide-slate-800 font-medium">
+                        <!-- Generado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 text-[10px] text-slate-500 italic text-right">
+                *Nota: Los nutrientes disminuyen paulatinamente a medida que la planta crece y absorbe compuestos del suelo.
+            </div>
+        </section>
+
+        <!-- SECCIÓN DE FEEDBACK CIENTÍFICO ECOLÓGICO -->
+        <section class="bg-emerald-50 p-6 border-t-2 border-emerald-100">
+            <h3 class="fancy-title text-emerald-800 text-xl mb-4 flex items-center gap-2">
+                📖 Bitácora del Botánico de la Semilla Mágica
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <!-- Relación Agua - Suelo -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100">
+                    <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 mb-2">
+                        💧 Suelo y Agua: Una pareja vital
+                    </h4>
+                    <p class="text-slate-600 leading-relaxed text-xs">
+                        La <strong>Arena</strong> drena el agua muy rápido, necesitando riego frecuente. La <strong>Arcilla</strong>, en cambio, la retiene con fuerza, lo que bajo riegos altos puede causar asfixia en las raíces por falta de oxígeno. El <strong>Limo</strong> es el balance perfecto para el crecimiento.
+                    </p>
+                </div>
+                <!-- Relación Luz - Nutrientes -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100">
+                    <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 mb-2">
+                        ☀️ Fotosíntesis y Nutrientes
+                    </h4>
+                    <p class="text-slate-600 leading-relaxed text-xs">
+                        La luz del sol provee la energía para activar la fotosíntesis. Sin embargo, para que el tallo y los frutos crezcan sanos, la planta absorbe nitrógeno, fósforo y potasio (nutrientes) del suelo. Mucha luz sin nutrientes debilita y "quema" la planta rápidamente.
+                    </p>
+                </div>
+                <!-- Ciclos biológicos -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100">
+                    <h4 class="font-extrabold text-slate-800 flex items-center gap-1.5 mb-2">
+                        🧬 Estrategia de las Semillas
+                    </h4>
+                    <p class="text-slate-600 leading-relaxed text-xs">
+                        Cada semilla tiene su propio reloj interno. El <strong>Rábano</strong> es de metabolismo acelerado, logrando dar frutos rápidamente con pocos recursos. El <strong>Arbusto</strong> crece con paciencia, requiriendo un entorno estable y balanceado durante más tiempo para florecer.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- SCRIPT DEL SIMULADOR -->
+    <script>
+        // Estado del Juego / Simulación
+        let activeTab = 'libre';
+        let currentSemilla = 'rapida'; // rapida, normal, lenta
+        let currentSuelo = 'limo'; // arena, limo, arcilla
+        let currentTiempo = 1; // 1 a 60 días
+        let playInterval = null;
+        let activeDesafio = 1; // 1, 2, 3
+
+        // Estructura de desafíos y sus estados
+        const desafiosData = {
+            1: {
+                title: '🏜️ El Desierto Productivo',
+                semilla: 'rapida',
+                suelo: 'arena',
+                minLuz: 3,       // Mucha Luz
+                minNutrientes: 3, // Altos nutrientes para compensar la arena
+                targetAgua: 2,   // Humedad moderada/equilibrada
+                targetDia: 25,
+                completado: false
+            },
+            2: {
+                title: '🍅 El Tomate Gourmet',
+                semilla: 'normal',
+                suelo: 'limo', // O Arcilla
+                minLuz: 3,
+                minNutrientes: 3,
+                targetAgua: 2,
+                targetDia: 45,
+                completado: false
+            },
+            3: {
+                title: '🌳 Supervivencia Extrema',
+                semilla: 'lenta',
+                suelo: 'arcilla',
+                minLuz: 1,      // Poca luz
+                targetAgua: 2,  // Humedo (evitar inundado para que no se asfixie)
+                targetDia: 50,
+                completado: false
+            }
+        };
+
+        // Al iniciar la carga
+        window.onload = function() {
+            updateSemilla('rapida', 'Rábano (Rápida)');
+            updateSuelo('limo', 'Limo (Equilibrado)');
+            triggerSimulation();
+        };
+
+        // Cambio de Tabs
+        function switchTab(tab) {
+            activeTab = tab;
+            const btnLibre = document.getElementById('btn-tab-libre');
+            const btnDesafios = document.getElementById('btn-tab-desafios');
+            const panelLibre = document.getElementById('panel-libre');
+            const panelDesafios = document.getElementById('panel-desafios');
+
+            if (tab === 'libre') {
+                btnLibre.className = 'px-4 py-1.5 rounded-full bg-white text-emerald-700 font-bold text-xs shadow-md transition-all scale-105';
+                btnDesafios.className = 'px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all';
+                panelLibre.classList.remove('hidden');
+                panelDesafios.classList.add('hidden');
+            } else {
+                btnDesafios.className = 'px-4 py-1.5 rounded-full bg-white text-emerald-700 font-bold text-xs shadow-md transition-all scale-105';
+                btnLibre.className = 'px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all';
+                panelDesafios.classList.remove('hidden');
+                panelLibre.classList.add('hidden');
+                selectDesafio(activeDesafio);
+            }
+            triggerSimulation();
+        }
+
+        // Selección de Desafío
+        function selectDesafio(id) {
+            // Validar si está bloqueado
+            if (id === 2 && !desafiosData[1].completado) {
+                return; // Bloqueado
+            }
+            if (id === 3 && !desafiosData[2].completado) {
+                return; // Bloqueado
+            }
+
+            activeDesafio = id;
+            
+            // Actualizar estilo visual de las tarjetas de desafío
+            for (let i = 1; i <= 3; i++) {
+                const card = document.getElementById(`card-desafio-${i}`);
+                if (i === id) {
+                    card.className = "border-2 border-emerald-500 bg-emerald-50/50 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md";
+                } else {
+                    card.className = "border border-slate-200 p-4 rounded-2xl cursor-pointer transition-all hover:shadow-md opacity-80";
+                }
+            }
+
+            // Aplicar variables predeterminadas o sugeridas para guiar al jugador
+            const d = desafiosData[id];
+            updateSemilla(d.semilla, d.semilla === 'rapida' ? 'Rábano' : d.semilla === 'normal' ? 'Tomate' : 'Arbusto');
+            updateSuelo(d.suelo, d.suelo === 'arena' ? 'Arena' : d.suelo === 'limo' ? 'Limo' : 'Arcilla');
+            
+            // Actualizar descripción de objetivos
+            const descLabel = document.getElementById('desc-desafio-activo');
+            if (id === 1) {
+                descLabel.innerHTML = `<strong>Objetivo:</strong> Configurar Rábano en Suelo Arenoso. Asegurar Mucha Luz y Nutrientes Altos. Riega de modo Equilibrado (Húmedo). Simula hasta superar el día 25.`;
+            } else if (id === 2) {
+                descLabel.innerHTML = `<strong>Objetivo:</strong> Configurar Tomate en Limo. Necesita Mucha Luz, Nutrientes Altos y Riego Húmedo equilibrado. Simula hasta superar el día 45.`;
+            } else if (id === 3) {
+                descLabel.innerHTML = `<strong>Objetivo:</strong> Configurar Arbusto en Arcilla. Sobrevive a Poca Luz y Riego Moderado. Llega al día 50 con vitalidad positiva (sin asfixia por exceso de agua).`;
+            }
+
+            resetSimulation();
+        }
+
+        // Updates de Controles
+        function updateSemilla(tipo, nombre) {
+            currentSemilla = tipo;
+            document.getElementById('label-semilla').innerText = nombre;
+            
+            // Actualizar botones de semilla
+            ['rapida', 'normal', 'lenta'].forEach(t => {
+                const btn = document.getElementById(`semilla-${t}`);
+                if (t === tipo) {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 transition-all";
+                } else {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all";
+                }
+            });
+            triggerSimulation();
+        }
+
+        function updateSuelo(tipo, nombre) {
+            currentSuelo = tipo;
+            document.getElementById('label-suelo').innerText = nombre;
+
+            // Actualizar visual del gradiente del suelo en SVG
+            const sueloSvg = document.getElementById('svg-suelo');
+            if (tipo === 'arena') {
+                sueloSvg.setAttribute('fill', 'url(#grad-suelo-arena)');
+            } else if (tipo === 'limo') {
+                sueloSvg.setAttribute('fill', 'url(#grad-suelo-limo)');
+            } else if (tipo === 'arcilla') {
+                sueloSvg.setAttribute('fill', 'url(#grad-suelo-arcilla)');
+            }
+
+            // Actualizar botones de suelo
+            ['arena', 'limo', 'arcilla'].forEach(t => {
+                const btn = document.getElementById(`suelo-${t}`);
+                if (t === tipo) {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-800 transition-all";
+                } else {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all";
+                }
+            });
+            triggerSimulation();
+        }
+
+        function updateTiempo(value) {
+            currentTiempo = parseInt(value);
+            document.getElementById('label-dias').innerText = `Día ${currentTiempo}`;
+            triggerSimulation();
+        }
+
+        // Play / Pause de animación de crecimiento
+        function togglePlay() {
+            const btn = document.getElementById('btn-play');
+            const icon = document.getElementById('icon-play');
+            const text = document.getElementById('text-play');
+            const slider = document.getElementById('input-tiempo');
+
+            if (playInterval) {
+                // Pausar
+                clearInterval(playInterval);
+                playInterval = null;
+                icon.innerText = "▶️";
+                text.innerText = "Simular Ciclo";
+            } else {
+                // Si ya llegó al final de los días, reiniciar antes de reproducir
+                if (currentTiempo >= 60) {
+                    currentTiempo = 1;
+                    slider.value = 1;
+                    updateTiempo(1);
+                }
+
+                // Reproducir
+                icon.innerText = "⏸️";
+                text.innerText = "Pausar";
+                playInterval = setInterval(() => {
+                    if (currentTiempo < 60) {
+                        currentTiempo++;
+                        slider.value = currentTiempo;
+                        updateTiempo(currentTiempo);
+                    } else {
+                        // Fin de ciclo
+                        clearInterval(playInterval);
+                        playInterval = null;
+                        icon.innerText = "▶️";
+                        text.innerText = "Simular Ciclo";
+                    }
+                }, 180); // velocidad del tiempo
+            }
+        }
+
+        function resetSimulation() {
+            if (playInterval) {
+                togglePlay();
+            }
+            currentTiempo = 1;
+            document.getElementById('input-tiempo').value = 1;
+            updateTiempo(1);
+        }
+
+        // CORAZÓN DEL JUEGO: Fórmulas de Simulación Ecológica
+        function triggerSimulation() {
+            // Leer valores de los sliders
+            const luzVal = parseInt(document.getElementById('input-luz').value);
+            const aguaVal = parseInt(document.getElementById('input-agua').value);
+            const nutrientesVal = parseInt(document.getElementById('input-nutrientes').value);
+
+            // Traducir valores a etiquetas de texto
+            const luzLabels = ["Poca", "Media", "Mucha"];
+            const aguaLabels = ["Seco", "Húmedo", "Inundado"];
+            const nutrientesLabels = ["Bajo", "Medio", "Alto"];
+
+            document.getElementById('val-luz').innerText = luzLabels[luzVal - 1];
+            document.getElementById('val-agua').innerText = aguaLabels[aguaVal - 1];
+            document.getElementById('val-nutrientes').innerText = nutrientesLabels[nutrientesVal - 1];
+
+            // Renderizado de partículas de Nutrientes en base al abono
+            const svgNutrientes = document.getElementById('svg-nutrientes');
+            svgNutrientes.innerHTML = '';
+            if (nutrientesVal >= 2) {
+                const cantidad = nutrientesVal === 3 ? 18 : 8;
+                for (let i = 0; i < cantidad; i++) {
+                    const x = 110 + Math.random() * 180;
+                    const y = 290 + Math.random() * 85;
+                    svgNutrientes.innerHTML += `<circle cx="${x}" cy="${y}" r="2" fill="#86efac" class="animate-bounce" style="animation-duration: ${1.5 + Math.random()}s" />`;
+                }
+            }
+
+            // Cambiar indicador de humedad inferior
+            const indicadorHumedad = document.getElementById('svg-humedad-agua');
+            if (aguaVal === 1) { // Seco
+                indicadorHumedad.setAttribute('fill', '#f59e0b');
+                indicadorHumedad.setAttribute('opacity', '0.2');
+            } else if (aguaVal === 2) { // Húmedo
+                indicadorHumedad.setAttribute('fill', '#3b82f6');
+                indicadorHumedad.setAttribute('opacity', '0.6');
+            } else { // Inundado
+                indicadorHumedad.setAttribute('fill', '#1d4ed8');
+                indicadorHumedad.setAttribute('opacity', '0.9');
+            }
+
+            // Renderizado de nubes en base al agua/riego
+            const skyWeather = document.getElementById('sky-weather');
+            skyWeather.innerHTML = '';
+            if (aguaVal === 2) { // Húmedo -> Nube ligera
+                skyWeather.innerHTML = `
+                    <svg width="60" height="40" viewBox="0 0 100 60" fill="#ffffff" opacity="0.8" class="animate-pulse">
+                        <path d="M20,40 A15,15 0 0,1 35,25 A20,20 0 0,1 70,25 A15,15 0 0,1 85,40 A10,10 0 0,1 75,50 L25,50 A10,10 0 0,1 20,40 Z" />
+                    </svg>
+                `;
+            } else if (aguaVal === 3) { // Inundado -> Nube de lluvia
+                skyWeather.innerHTML = `
+                    <div class="flex flex-col items-center">
+                        <svg width="70" height="45" viewBox="0 0 100 60" fill="#94a3b8" class="animate-bounce" style="animation-duration: 4s">
+                            <path d="M20,40 A15,15 0 0,1 35,25 A20,20 0 0,1 70,25 A15,15 0 0,1 85,40 A10,10 0 0,1 75,50 L25,50 A10,10 0 0,1 20,40 Z" />
+                        </svg>
+                        <div class="flex space-x-1 mt-1">
+                            <span class="w-1 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+                            <span class="w-1 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+                            <span class="w-1 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- REGLAS BIOLÓGICAS DE SALUD (Vitalidad de la Planta) ---
+            let vitalidad = 100;
+            let factoresNegativos = [];
+
+            // 1. Relación Riego - Suelo
+            if (currentSuelo === 'arena' && aguaVal === 1) {
+                vitalidad -= 60;
+                factoresNegativos.push("Estrés hídrico: el suelo arenoso no retiene agua y está reseco.");
+            } else if (currentSuelo === 'arena' && aguaVal === 2) {
+                vitalidad -= 15;
+                factoresNegativos.push("Poco agua: la arena drena rápido, falta agua constante.");
+            } else if (currentSuelo === 'arcilla' && aguaVal === 3) {
+                vitalidad -= 55;
+                factoresNegativos.push("Asfixia radicular: la arcilla compacta retiene demasiada agua y ahoga las raíces.");
+            } else if (currentSuelo === 'arcilla' && aguaVal === 1) {
+                vitalidad -= 10; // La arcilla compactada seca es dura, pero retiene algo residual.
+            }
+
+            // 2. Relación Luz y Nutrientes
+            if (luzVal === 1) {
+                vitalidad -= 30;
+                factoresNegativos.push("Etiolación: falta luz solar para realizar la fotosíntesis.");
+            }
+            if (nutrientesVal === 1) {
+                vitalidad -= 25;
+                factoresNegativos.push("Deficiencia nutricional: la planta carece de nitrógeno para crecer.");
+            }
+            if (luzVal === 3 && nutrientesVal === 1) {
+                vitalidad -= 20; // Mucha luz y nada de nutrientes quema el metabolismo
+                factoresNegativos.push("Desgaste metabólico: demasiada luz solar sin nutrientes para sostenerla.");
+            }
+            if (aguaVal === 1) { // Seco general
+                vitalidad -= 40;
+                factoresNegativos.push("Deshidratación general.");
+            }
+
+            // Limitar vitalidad
+            vitalidad = Math.max(10, vitalidad);
+
+            // Fases de Crecimiento del Tallo según tipo de semilla y días
+            let diasMaturidad = 45;
+            if (currentSemilla === 'rapida') diasMaturidad = 25;
+            if (currentSemilla === 'lenta') diasMaturidad = 60;
+
+            // Progreso relativo al ciclo biológico
+            let progreso = Math.min(1.0, currentTiempo / diasMaturidad);
+            if (vitalidad < 30) {
+                // Si la planta está muriendo, su crecimiento se reduce o detiene
+                progreso *= (vitalidad / 100);
+            }
+
+            // Decidir Fase
+            let fase = "Semilla";
+            if (progreso > 0.1 && progreso <= 0.3) fase = "Germinación";
+            else if (progreso > 0.3 && progreso <= 0.6) fase = "Plántula";
+            else if (progreso > 0.6 && progreso <= 0.85) fase = "Maduración";
+            else if (progreso > 0.85) fase = "Floración / Cosecha";
+
+            // Mostrar salud y fase en UI
+            const lblVitalidad = document.getElementById('vitalidad-porcentaje');
+            lblVitalidad.innerText = `${vitalidad}%`;
+            if (vitalidad >= 80) {
+                lblVitalidad.className = "text-emerald-400 font-extrabold text-sm";
+            } else if (vitalidad >= 40) {
+                lblVitalidad.className = "text-amber-500 font-extrabold text-sm";
+            } else {
+                lblVitalidad.className = "text-red-500 font-extrabold text-sm animate-pulse";
+            }
+
+            document.getElementById('fase-actual').innerText = fase;
+
+            // Determinar títulos y descripciones de estado actual
+            let tituloEstado = "¡Semilla Plantada!";
+            let descEstado = "La semilla espera las condiciones idóneas en el suelo para germinar.";
+            let emojiEstado = "🌱";
+            let descResultado = "Esperando brotes";
+
+            if (fase === "Germinación") {
+                emojiEstado = "🌱";
+                if (vitalidad >= 75) {
+                    tituloEstado = "¡Germinación Exitosa!";
+                    descEstado = "La semilla absorbe humedad de forma correcta y asoma su primer brote.";
+                    descResultado = "Brote saludable";
+                } else {
+                    tituloEstado = "Germinación con dificultad";
+                    descEstado = "Las condiciones no son óptimas. El brote se ve débil o demorado.";
+                    descResultado = "Crecimiento lento";
+                }
+            } else if (fase === "Plántula") {
+                emojiEstado = "🌿";
+                if (vitalidad >= 75) {
+                    tituloEstado = "Plántula en crecimiento";
+                    descEstado = "El tallo se fortalece y empiezan a salir las hojas verdaderas.";
+                    descResultado = "Buen ritmo";
+                } else {
+                    tituloEstado = "Plántula estresada";
+                    descEstado = "La plántula sobrevive pero con deficiencias. Las hojas pierden color.";
+                    descResultado = "Estrés vegetal";
+                }
+            } else if (fase === "Maduración" || fase === "Floración / Cosecha") {
+                if (vitalidad >= 75) {
+                    emojiEstado = currentSemilla === 'rapida' ? "🍒" : currentSemilla === 'normal' ? "🍅" : "🌳";
+                    tituloEstado = "¡Etapa Reproductiva y Madurez!";
+                    descEstado = `La planta ha madurado completamente. ¡Felicidades! Se encuentra rebosante de vida.`;
+                    descResultado = "¡Frutos Perfectos!";
+                } else if (vitalidad >= 40) {
+                    emojiEstado = "🥀";
+                    tituloEstado = "Maduración incompleta";
+                    descEstado = "La planta completó el ciclo, pero sus frutos y hojas son pequeños y deficientes.";
+                    descResultado = "Cosecha regular";
+                } else {
+                    emojiEstado = "💀";
+                    tituloEstado = "Planta en agonía";
+                    descEstado = "La combinación de factores ambientales ha provocado marchitamiento severo.";
+                    descResultado = "Cosecha fallida";
+                }
+            }
+
+            // Si hay factores negativos, listarlos en la descripción
+            if (factoresNegativos.length > 0 && currentTiempo > 5) {
+                descEstado = factoresNegativos[0] + " Ajusta los controles para compensar.";
+            }
+
+            document.getElementById('status-emoji').innerText = emojiEstado;
+            document.getElementById('status-title').innerText = tituloEstado;
+            document.getElementById('status-desc').innerText = descEstado;
+            document.getElementById('resultado-descripcion').innerText = descResultado;
+
+            // --- RENDERIZADO VISUAL DINÁMICO DEL SVG ---
+            renderPlantaSVG(progreso, vitalidad, fase);
+
+            // --- CALCULAR Y RENDERIZAR TABLA DE DATOS (NUEVO) ---
+            calcularTablaDeValores(luzVal, aguaVal, nutrientesVal, vitalidad);
+
+            // --- COMPROBAR LOGROS EN MODO DESAFÍOS ---
+            if (activeTab === 'desafios') {
+                checkDesafioLogros(luzVal, aguaVal, nutrientesVal, vitalidad, fase);
+            }
+        }
+
+        // Función que calcula y genera la tabla matemática en base a las variables actuales
+        function calcularTablaDeValores(luz, agua, nutrientes, saludPlanta) {
+            const cuerpoTabla = document.getElementById('tabla-datos-cuerpo');
+            cuerpoTabla.innerHTML = '';
+
+            // Definir hitos de tiempo para la tabla de datos
+            const hitos = [1, 10, 20, 30, 40, 50, 60];
+
+            // Alturas máximas por especie en cm
+            let alturaMaxima = 20; // Rábano
+            if (currentSemilla === 'normal') alturaMaxima = 80; // Tomate
+            if (currentSemilla === 'lenta') alturaMaxima = 150; // Arbusto
+
+            let diasMaturidad = currentSemilla === 'rapida' ? 25 : currentSemilla === 'normal' ? 45 : 60;
+
+            hitos.forEach(dia => {
+                // 1. Simular Luz en Lux aproximados (Poca: 1500, Media: 5000, Mucha: 12000)
+                let luxBase = luz === 1 ? 1500 : luz === 2 ? 5000 : 12000;
+                // Pequeña variación diurna simulada
+                let lux = Math.round(luxBase + (Math.sin(dia) * 150));
+
+                // 2. Simular Humedad en % según tipo de suelo y riego
+                let humedadBase = agua === 1 ? 15 : agua === 2 ? 50 : 95;
+                // La arena pierde humedad con los días, la arcilla la retiene mucho más
+                if (currentSuelo === 'arena' && agua === 2) humedadBase -= (dia * 0.2); // se seca gradualmente
+                if (currentSuelo === 'arcilla' && agua === 3) humedadBase = Math.min(100, humedadBase + (dia * 0.1)); // se inunda más
+                let humedad = Math.max(5, Math.min(100, Math.round(humedadBase)));
+
+                // 3. Simular Nutrientes (%) que van disminuyendo según la absorción del crecimiento
+                let nutrientesBase = nutrientes === 1 ? 20 : nutrientes === 2 ? 60 : 100;
+                let consumo = (dia / diasMaturidad) * 35; // Consumo máximo de 35% a madurez
+                if (saludPlanta < 40) consumo *= 0.2; // Planta enferma consume casi nada
+                let nutrientesRestantes = Math.max(5, Math.round(nutrientesBase - (dia > 5 ? consumo : 0)));
+
+                // 4. Progreso de altura
+                let progLocal = Math.min(1.0, dia / diasMaturidad);
+                if (saludPlanta < 30) progLocal *= (saludPlanta / 100); // detiene crecimiento si está enferma
+
+                let altura = 0;
+                if (progLocal > 0.15) { // Empieza a crecer tras germinar
+                    altura = Math.round(progLocal * alturaMaxima * (saludPlanta / 100) * 10) / 10;
+                }
+
+                // Fase biológica para el día correspondiente
+                let faseDia = "Semilla";
+                if (progLocal > 0.1 && progLocal <= 0.3) faseDia = "Germinación 🌿";
+                else if (progLocal > 0.3 && progLocal <= 0.6) faseDia = "Plántula 🌱";
+                else if (progLocal > 0.6 && progLocal <= 0.85) faseDia = "Maduración 🌳";
+                else if (progLocal > 0.85) faseDia = "Floración / Cosecha 🍒";
+
+                // Agregar fila a la tabla
+                cuerpoTabla.innerHTML += `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="py-3 px-4 font-bold text-slate-300">Día ${dia}</td>
+                        <td class="py-3 px-4">${lux.toLocaleString()} Lux</td>
+                        <td class="py-3 px-4">${humedad}%</td>
+                        <td class="py-3 px-4">${nutrientesRestantes}%</td>
+                        <td class="py-3 px-4">
+                            <span class="${saludPlanta >= 80 ? 'text-emerald-400' : saludPlanta >= 40 ? 'text-amber-400' : 'text-red-400'}">
+                                ${saludPlanta}%
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-emerald-300 font-extrabold">${altura} cm</td>
+                        <td class="py-3 px-4 text-right text-slate-400">${faseDia}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Función para exportar los datos cuantitativos al portapapeles en formato CSV
+        function copiarDatosCSV() {
+            const luzVal = parseInt(document.getElementById('input-luz').value);
+            const aguaVal = parseInt(document.getElementById('input-agua').value);
+            const nutrientesVal = parseInt(document.getElementById('input-nutrientes').value);
+            
+            let diasMaturidad = currentSemilla === 'rapida' ? 25 : currentSemilla === 'normal' ? 45 : 60;
+            let alturaMaxima = currentSemilla === 'rapida' ? 20 : currentSemilla === 'normal' ? 80 : 150;
+            let saludPlanta = parseInt(document.getElementById('vitalidad-porcentaje').innerText);
+
+            // Generar contenido del CSV
+            let csvContent = "Dia;Luz(Lux);HumedadSuelo(%);NutrientesDisponible(%);SaludPlanta(%);AlturaPlanta(cm);Fase\n";
+            const hitos = [1, 10, 20, 30, 40, 50, 60];
+
+            hitos.forEach(dia => {
+                let luxBase = luzVal === 1 ? 1500 : luzVal === 2 ? 5000 : 12000;
+                let lux = Math.round(luxBase + (Math.sin(dia) * 150));
+                
+                let humedadBase = aguaVal === 1 ? 15 : aguaVal === 2 ? 50 : 95;
+                if (currentSuelo === 'arena' && aguaVal === 2) humedadBase -= (dia * 0.2);
+                if (currentSuelo === 'arcilla' && aguaVal === 3) humedadBase = Math.min(100, humedadBase + (dia * 0.1));
+                let humedad = Math.max(5, Math.min(100, Math.round(humedadBase)));
+
+                let nutrientesBase = nutrientesVal === 1 ? 20 : nutrientesVal === 2 ? 60 : 100;
+                let consumo = (dia / diasMaturidad) * 35;
+                if (saludPlanta < 40) consumo *= 0.2;
+                let nutrientesRestantes = Math.max(5, Math.round(nutrientesBase - (dia > 5 ? consumo : 0)));
+
+                let progLocal = Math.min(1.0, dia / diasMaturidad);
+                if (saludPlanta < 30) progLocal *= (saludPlanta / 100);
+
+                let altura = 0;
+                if (progLocal > 0.15) {
+                    altura = Math.round(progLocal * alturaMaxima * (saludPlanta / 100) * 10) / 10;
+                }
+
+                let faseDia = "Semilla";
+                if (progLocal > 0.1 && progLocal <= 0.3) faseDia = "Germinacion";
+                else if (progLocal > 0.3 && progLocal <= 0.6) faseDia = "Plantula";
+                else if (progLocal > 0.6 && progLocal <= 0.85) faseDia = "Maduracion";
+                else if (progLocal > 0.85) faseDia = "Floracion";
+
+                csvContent += `${dia};${lux};${humedad};${nutrientesRestantes};${saludPlanta};${altura};${faseDia}\n`;
+            });
+
+            // Usar la API de compatibilidad segura para iframe
+            const tempInput = document.createElement('textarea');
+            tempInput.value = csvContent;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            // Toast de confirmación sin romper el flujo
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-4 right-4 bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-2xl shadow-2xl z-50 text-xs animate-bounce";
+            toast.innerText = "¡CSV copiado! Pégalo en Excel o Sheets con (Ctrl+V)";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // Función que dibuja la planta en tiempo real en base a los datos
+        function renderPlantaSVG(progreso, vitalidad, fase) {
+            const svgBrote = document.getElementById('svg-brote');
+            const svgRaices = document.getElementById('svg-raices');
+            const svgSemilla = document.getElementById('svg-semilla');
+
+            // Limpiar brote y raíces anteriores
+            svgBrote.innerHTML = '';
+            svgRaices.innerHTML = '';
+
+            // Color de hojas y tallo basado en vitalidad
+            let colorPlanta = "#10b981"; // Verde esmeralda óptimo
+            let colorRaices = "#b45309"; // Café madera
+            let filtro = "";
+
+            if (vitalidad < 45) {
+                colorPlanta = "#a3a35c"; // Verde seco/marchito
+                colorRaices = "#78350f";
+                filtro = "filter='url(#deshidratado)'";
+            } else if (vitalidad < 75) {
+                colorPlanta = "#84cc16"; // Verde lima ligeramente pálido
+            }
+
+            // Ocultar cáscara de semilla después de germinación avanzada
+            if (progreso > 0.4) {
+                svgSemilla.setAttribute('opacity', '0');
+            } else {
+                svgSemilla.setAttribute('opacity', `${1 - progreso * 2}`);
+            }
+
+            // DIBUJAR RAÍCES (Subterráneas, Max Y: 380, Inician en Y: 270, X: 200)
+            if (progreso > 0.1) {
+                const raizMaxLargo = progreso * 90; // Largo de raíz principal
+                const yRaizFin = 270 + raizMaxLargo;
+
+                // Raíz Principal
+                svgRaices.innerHTML += `<path d="M 200 270 Q 195 ${270 + raizMaxLargo/2}, 200 ${yRaizFin}" fill="none" stroke="${colorRaices}" stroke-width="${2 + progreso*3}" />`;
+                
+                // Raicillas laterales (si el progreso lo amerita)
+                if (progreso > 0.3) {
+                    svgRaices.innerHTML += `<path d="M 198 ${270 + raizMaxLargo*0.3} Q 185 ${270 + raizMaxLargo*0.4}, 175 ${270 + raizMaxLargo*0.5}" fill="none" stroke="${colorRaices}" stroke-width="1.5" />`;
+                    svgRaices.innerHTML += `<path d="M 201 ${270 + raizMaxLargo*0.6} Q 215 ${270 + raizMaxLargo*0.7}, 225 ${270 + raizMaxLargo*0.8}" fill="none" stroke="${colorRaices}" stroke-width="1.5" />`;
+                }
+                if (progreso > 0.6) {
+                    svgRaices.innerHTML += `<path d="M 199 ${270 + raizMaxLargo*0.5} Q 180 ${270 + raizMaxLargo*0.7}, 170 ${270 + raizMaxLargo*0.9}" fill="none" stroke="${colorRaices}" stroke-width="1.2" />`;
+                    svgRaices.innerHTML += `<path d="M 200 ${270 + raizMaxLargo*0.2} Q 218 ${270 + raizMaxLargo*0.4}, 230 ${270 + raizMaxLargo*0.5}" fill="none" stroke="${colorRaices}" stroke-width="1.2" />`;
+                }
+            }
+
+            // DIBUJAR TALLO Y HOJAS SUPERIORES
+            if (progreso > 0.2) {
+                // Altura del tallo máximo: de Y=270 hacia arriba.
+                // Dependiendo del tipo de semilla, la forma cambia ligeramente
+                let alturaTallo = progreso * 140; // Rápida y Normal
+                if (currentSemilla === 'lenta') alturaTallo = progreso * 110; // Crecimiento más achaparrado inicial
+
+                const yTalloFin = 270 - alturaTallo;
+
+                // Tallo Principal curvo
+                svgBrote.innerHTML += `
+                    <path d="M 200 270 Q 205 ${270 - alturaTallo/2}, 200 ${yTalloFin}" 
+                          fill="none" stroke="${colorPlanta}" stroke-width="${3 + progreso*4}" ${filtro} />
+                `;
+
+                // Hojas por fase
+                if (progreso > 0.35) {
+                    // Primer par de hojas bajas
+                    const yHojasBajas = 270 - (alturaTallo * 0.4);
+                    svgBrote.innerHTML += `
+                        <!-- Hoja izquierda -->
+                        <path d="M 201 ${yHojasBajas} Q 170 ${yHojasBajas - 15}, 160 ${yHojasBajas - 10} Q 180 ${yHojasBajas + 10}, 201 ${yHojasBajas}" 
+                              fill="${colorPlanta}" stroke="${colorPlanta}" stroke-width="1" ${filtro} />
+                        <!-- Hoja derecha -->
+                        <path d="M 199 ${yHojasBajas} Q 230 ${yHojasBajas - 15}, 240 ${yHojasBajas - 10} Q 220 ${yHojasBajas + 10}, 199 ${yHojasBajas}" 
+                              fill="${colorPlanta}" stroke="${colorPlanta}" stroke-width="1" ${filtro} />
+                    `;
+                }
+
+                if (progreso > 0.6) {
+                    // Segundo par de hojas altas
+                    const yHojasMedias = 270 - (alturaTallo * 0.75);
+                    svgBrote.innerHTML += `
+                        <!-- Hoja izquierda alta -->
+                        <path d="M 200 ${yHojasMedias} Q 165 ${yHojasMedias - 20}, 155 ${yHojasMedias - 15} Q 175 ${yHojasMedias + 5}, 200 ${yHojasMedias}" 
+                              fill="${colorPlanta}" stroke="${colorPlanta}" stroke-width="1" ${filtro} />
+                        <!-- Hoja derecha alta -->
+                        <path d="M 200 ${yHojasMedias} Q 235 ${yHojasMedias - 20}, 245 ${yHojasMedias - 15} Q 225 ${yHojasMedias + 5}, 200 ${yHojasMedias}" 
+                              fill="${colorPlanta}" stroke="${colorPlanta}" stroke-width="1" ${filtro} />
+                    `;
+                }
+
+                // Flores y Frutos según semilla
+                if (progreso > 0.8) {
+                    const yFlor = yTalloFin;
+
+                    if (currentSemilla === 'rapida') {
+                        // Rábano: Raíz globosa roja/morada subterránea
+                        const raizHinchadaY = 275 + (progreso * 15);
+                        svgRaices.innerHTML += `
+                            <!-- Rábano Subterráneo -->
+                            <ellipse cx="200" cy="${raizHinchadaY}" rx="18" ry="14" fill="#ec4899" stroke="#db2777" stroke-width="2" />
+                            <ellipse cx="200" cy="${raizHinchadaY + 4}" rx="12" ry="8" fill="#f472b6" opacity="0.6" />
+                        `;
+                    } else if (currentSemilla === 'normal') {
+                        // Tomate: Flores amarillas y luego Tomates rojos colgantes
+                        const xFruto1 = 180, yFruto1 = yTalloFin + 35;
+                        const xFruto2 = 220, yFruto2 = yTalloFin + 55;
+
+                        // Tomate 1
+                        svgBrote.innerHTML += `
+                            <!-- Rama del tomate -->
+                            <path d="M 200 ${yTalloFin + 30} Q 185 ${yTalloFin + 30}, ${xFruto1} ${yFruto1}" fill="none" stroke="${colorPlanta}" stroke-width="2" />
+                            <!-- Fruto Tomate -->
+                            <circle cx="${xFruto1}" cy="${yFruto1}" r="12" fill="${vitalidad > 70 ? '#ef4444' : '#f59e0b'}" stroke="#dc2626" stroke-width="1.5" />
+                            <!-- Brillo tomate -->
+                            <circle cx="${xFruto1 - 4}" cy="${yFruto1 - 4}" r="3" fill="#ffffff" opacity="0.5" />
+                            <!-- Sépalo (hojitas arriba del tomate) -->
+                            <path d="M ${xFruto1 - 5} ${yFruto1 - 10} L ${xFruto1 + 5} ${yFruto1 - 10} L ${xFruto1} ${yFruto1 - 6} Z" fill="${colorPlanta}" />
+                        `;
+
+                        // Tomate 2
+                        svgBrote.innerHTML += `
+                            <path d="M 200 ${yTalloFin + 50} Q 215 ${yTalloFin + 50}, ${xFruto2} ${yFruto2}" fill="none" stroke="${colorPlanta}" stroke-width="2" />
+                            <circle cx="${xFruto2}" cy="${yFruto2}" r="10" fill="${vitalidad > 70 ? '#ef4444' : '#eab308'}" stroke="#ca8a04" stroke-width="1.5" />
+                            <circle cx="${xFruto2 - 3}" cy="${yFruto2 - 3}" r="2" fill="#ffffff" opacity="0.5" />
+                            <path d="M ${xFruto2 - 4} ${yFruto2 - 8} L ${xFruto2 + 4} ${yFruto2 - 8} L ${xFruto2} ${yFruto2 - 5} Z" fill="${colorPlanta}" />
+                        `;
+                    } else if (currentSemilla === 'lenta') {
+                        // Arbusto: Pequeñas bayas azules/moradas
+                        const bayas = [
+                            {x: 185, y: yTalloFin + 25},
+                            {x: 215, y: yTalloFin + 35},
+                            {x: 165, y: yTalloFin + 50},
+                            {x: 230, y: yTalloFin + 55}
+                        ];
+                        bayas.forEach(b => {
+                            svgBrote.innerHTML += `
+                                <circle cx="${b.x}" cy="${b.y}" r="6" fill="${vitalidad > 70 ? '#6366f1' : '#a855f7'}" stroke="#4f46e5" stroke-width="1" />
+                                <circle cx="${b.x - 2}" cy="${b.y - 2}" r="1.5" fill="#ffffff" opacity="0.6" />
+                            `;
+                        });
+                    }
+                }
+            }
+        }
+
+        // Validación de Desafíos logrados
+        function checkDesafioLogros(luz, agua, nutrientes, vitalidad, fase) {
+            const d = desafiosData[activeDesafio];
+
+            if (d && !d.completado) {
+                // Verificar parámetros requeridos para el desafío activo
+                const matchSemilla = (currentSemilla === d.semilla);
+                const matchSuelo = (currentSuelo === d.suelo);
+                const matchLuz = (luz >= d.minLuz);
+                const matchNutrientes = (d.minNutrientes ? nutrientes >= d.minNutrientes : true);
+                const matchAgua = (d.targetAgua ? agua === d.targetAgua : true);
+                const matchDia = (currentTiempo >= d.targetDia);
+                const matchSalud = (vitalidad >= 60);
+
+                if (matchSemilla && matchSuelo && matchLuz && matchNutrientes && matchAgua && matchDia && matchSalud) {
+                    // Desafío Superado
+                    d.completado = true;
+                    document.getElementById(`status-desafio-${activeDesafio}`).innerText = "✅ Superado";
+                    document.getElementById(`status-desafio-${activeDesafio}`).className = "text-xs font-bold text-emerald-600 animate-bounce";
+
+                    // Habilitar el siguiente desafío
+                    const nextId = activeDesafio + 1;
+                    if (nextId <= 3) {
+                        const nextCard = document.getElementById(`card-desafio-${nextId}`);
+                        nextCard.classList.remove('opacity-50');
+                        document.getElementById(`status-desafio-${nextId}`).innerText = "Pendiente";
+                        document.getElementById(`status-desafio-${nextId}`).className = "text-xs font-bold text-amber-600";
+                    }
+
+                    // Lanzar felicitación interactiva sin alert browser
+                    showCongratsModal();
+                }
+            }
+        }
+
+        // Crear elemento flotante de felicitaciones (evitando alerts)
+        function showCongratsModal() {
+            const modal = document.createElement('div');
+            modal.className = "fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in";
+            modal.id = "modal-congrats";
+            modal.innerHTML = `
+                <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center border-4 border-emerald-400 shadow-2xl transform scale-100 transition-all">
+                    <span class="text-6xl block mb-4">🎉</span>
+                    <h3 class="fancy-title text-2xl text-slate-800 mb-2">¡Desafío Completado!</h3>
+                    <p class="text-slate-600 text-sm mb-6">
+                        Lograste equilibrar el ecosistema de la Semilla Mágica bajo condiciones complejas de manera óptima.
+                    </p>
+                    <button onclick="closeCongratsModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all shadow-md">
+                        ¡Continuar Investigando!
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function closeCongratsModal() {
+            const modal = document.getElementById('modal-congrats');
+            if (modal) {
+                modal.remove();
+            }
+        }
+    </script>
+</body>
+</html>
